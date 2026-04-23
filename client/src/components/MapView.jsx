@@ -23,7 +23,13 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-export default function MapView({ places, onAddPlace, canAddPlaces, onRequireAuth }) {
+export default function MapView({
+  places,
+  onAddPlace,
+  canAddPlaces,
+  onRequireAuth,
+  onSearchLocation
+}) {
   const [draftPlace, setDraftPlace] = useState(null);
   const [formData, setFormData] = useState({ title: '', description: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -99,6 +105,13 @@ export default function MapView({ places, onAddPlace, canAddPlaces, onRequireAut
                     <p className="text-sm text-slate-600">
                       {lat.toFixed(4)}, {lng.toFixed(4)}
                     </p>
+                    <button
+                      type="button"
+                      onClick={() => onSearchLocation?.(place._id)}
+                      className="mt-2 rounded-full bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-100"
+                    >
+                      Search Location
+                    </button>
                   </div>
                 </Popup>
               </Marker>

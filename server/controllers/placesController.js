@@ -1,5 +1,34 @@
 const Place = require('../models/Place');
 
+function sanitizeStringList(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+    .filter(Boolean);
+}
+
+function sanitizeTravelGuide(travelGuide = {}) {
+  if (!travelGuide || typeof travelGuide !== 'object') {
+    return {};
+  }
+
+  return {
+    overview: typeof travelGuide.overview === 'string' ? travelGuide.overview.trim() : '',
+    mustVisitSpots: sanitizeStringList(travelGuide.mustVisitSpots),
+    hotelNotes: sanitizeStringList(travelGuide.hotelNotes),
+    transportTips: sanitizeStringList(travelGuide.transportTips),
+    safetyNotes: sanitizeStringList(travelGuide.safetyNotes),
+    packingList: sanitizeStringList(travelGuide.packingList),
+    foodToTry: sanitizeStringList(travelGuide.foodToTry),
+    localEtiquette: sanitizeStringList(travelGuide.localEtiquette),
+    bestTimeToVisit:
+      typeof travelGuide.bestTimeToVisit === 'string' ? travelGuide.bestTimeToVisit.trim() : ''
+  };
+}
+
 exports.getPlaces = async (req, res) => {
   try {
     const query = req.user ? { user: req.user.id } : { public: true };
@@ -8,6 +37,28 @@ exports.getPlaces = async (req, res) => {
   } catch (error) {
     console.error('Error fetching places:', error);
     res.status(500).json({ message: 'Failed to fetch places' });
+  }
+};
+
+exports.getPlaceById = async (req, res) => {
+  try {
+    const query = req.user
+      ? {
+          _id: req.params.id,
+          $or: [{ user: req.user.id }, { public: true }]
+        }
+      : { _id: req.params.id, public: true };
+
+    const place = await Place.findOne(query);
+
+    if (!place) {
+      return res.status(404).json({ message: 'Place not found' });
+    }
+
+    res.json(place);
+  } catch (error) {
+    console.error('Error fetching place:', error);
+    res.status(500).json({ message: 'Failed to fetch place' });
   }
 };
 
@@ -52,6 +103,10 @@ exports.updatePlace = async (req, res) => {
         coordinates: [updates.lng, updates.lat]
       };
       updates.address = `${updates.lat.toFixed(4)}, ${updates.lng.toFixed(4)}`;
+    }
+
+    if ('travelGuide' in updates) {
+      updates.travelGuide = sanitizeTravelGuide(updates.travelGuide);
     }
 
     delete updates.lat;

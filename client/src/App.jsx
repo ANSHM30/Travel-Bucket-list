@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Auth from './pages/Auth';
+import PlacePage from './pages/PlacePage';
 import Profile from './pages/Profile';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/places/:id" element={<PlacePage />} />
             <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>

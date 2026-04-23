@@ -77,6 +77,28 @@ export default function Home() {
     }
   };
 
+  const searchLocation = (id) => {
+    const place = places.find((entry) => entry._id === id);
+
+    if (!place) {
+      return;
+    }
+
+    const [lng, lat] = place.location?.coordinates ?? [];
+    const searchTarget = place.address || place.title || '';
+    const query =
+      searchTarget.trim() ||
+      (typeof lat === 'number' && typeof lng === 'number' ? `${lat},${lng}` : '');
+
+    if (!query) {
+      alert('Location details are unavailable for this place.');
+      return;
+    }
+
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+    window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -123,6 +145,7 @@ export default function Home() {
           onAddPlace={addPlace}
           canAddPlaces={isAuthenticated}
           onRequireAuth={() => navigate('/auth')}
+          onSearchLocation={searchLocation}
         />
       </section>
 
@@ -146,6 +169,7 @@ export default function Home() {
               }}
               onDelete={deletePlace}
               onToggleVisited={toggleVisited}
+              onSearchLocation={searchLocation}
             />
           );
         })}
